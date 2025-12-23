@@ -1,0 +1,166 @@
+"""Integration tests for API endpoints."""
+
+import pytest
+from fastapi.testclient import TestClient
+from main import create_app
+from api.di import get_airline_repository
+from infrastructure.repositories.in_memory_airline_repository import InMemoryAirlineRepository
+
+
+@pytest.fixture
+def client():
+    """Create a test client with a fresh repository."""
+    app = create_app()
+    
+    # Override the repository with a fresh instance for each test
+    test_repository = InMemoryAirlineRepository()
+    
+    def override_repository():
+        return test_repository
+    
+    # Reset dependency injection
+    import api.di
+    api.di._repository = test_repository
+    
+    with TestClient(app) as test_client:
+        yield test_client
+    
+    # Clean up
+    api.di._repository = None
+
+
+def test_create_airline(client):
+    """Test creating an airline via API."""
+    response = client.post(
+        "/api/v1/airlines/",
+        json={
+            "name": "American Airlines",
+            "code": "AA",
+            "country": "United States",
+            "active": True
+        }
+    )
+    
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "American Airlines"
+    assert data["code"] == "AA"
+    assert data["id"] is not None
+
+
+def test_create_duplicate_airline(client):
+    """Test that creating duplicate airline code returns 400."""
+    airline_data = {
+        "name": "American Airlines",
+        "code": "AA",
+        "country": "United States"
+    }
+    
+    # Create first airline
+    response1 = client.post("/api/v1/airlines/", json=airline_data)
+    assert response1.status_code == 201
+    
+    # Try to create duplicate
+    response2 = client.post("/api/v1/airlines/", json=airline_data)
+    assert response2.status_code == 400
+
+
+def test_get_airline(client):
+    """Test getting an airline by ID."""
+    # Create airline
+    create_response = client.post(
+        "/api/v1/airlines/",
+        json={"name": "Delta", "code": "DL", "country": "United States"}
+    )
+    airline_id = create_response.json()["id"]
+    
+    # Get airline
+    response = client.get(f"/api/v1/airlines/{airline_id}")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == airline_id
+    assert data["name"] == "Delta"
+
+
+def test_get_nonexistent_airline(client):
+    """Test getting a non-existent airline returns 404."""
+    response = client.get("/api/v1/airlines/nonexistent-id")
+    assert response.status_code == 404
+
+
+def test_list_airlines(client):
+    """Test listing all airlines."""
+    # Create multiple airlines
+    client.post("/api/v1/airlines/", json={"name": "AA", "code": "AA", "country": "US"})
+    client.post("/api/v1/airlines/", json={"name": "DL", "code": "DL", "country": "US"})
+    
+    # List all
+    response = client.get("/api/v1/airlines/")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+
+
+def test_list_active_airlines_only(client):
+    """Test listing only active airlines."""
+    # Create active and inactive airlines
+    client.post("/api/v1/airlines/", json={"name": "Active", "code": "AC", "country": "US", "active": True})
+    client.post("/api/v1/airlines/", json={"name": "Inactive", "code": "IN", "country": "US", "active": False})
+    
+    # List active only
+    response = client.get("/api/v1/airlines/?active_only=true")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["code"] == "AC"
+
+
+def test_update_airline(client):
+    """Test updating an airline."""
+    # Create airline
+    create_response = client.post(
+        "/api/v1/airlines/",
+        json={"name": "United", "code": "UA", "country": "United States"}
+    )
+    airline_id = create_response.json()["id"]
+    
+    # Update airline
+    response = client.put(
+        f"/api/v1/airlines/{airline_id}",
+        json={"name": "United Airlines", "active": False}
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "United Airlines"
+    assert data["active"] is False
+
+
+def test_delete_airline(client):
+    """Test deleting an airline."""
+    # Create airline
+    create_response = client.post(
+        "/api/v1/airlines/",
+        json={"name": "Test", "code": "TS", "country": "Test Country"}
+    )
+    airline_id = create_response.json()["id"]
+    
+    # Delete airline
+    response = client.delete(f"/api/v1/airlines/{airline_id}")
+    
+    assert response.status_code == 204
+    
+    # Verify it's deleted
+    get_response = client.get(f"/api/v1/airlines/{airline_id}")
+    assert get_response.status_code == 404
+
+
+def test_health_check(client):
+    """Test health check endpoint."""
+    response = client.get("/health")
+    
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
