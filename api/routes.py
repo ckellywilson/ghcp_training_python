@@ -73,8 +73,8 @@ def get_airline(
 
 @router.get("/", response_model=list[AirlineResponseDTO])
 def list_airlines(
-    active_only: bool = False,
-    use_case: Annotated[ListAirlinesUseCase, Depends(get_list_airlines_use_case)]
+    use_case: Annotated[ListAirlinesUseCase, Depends(get_list_airlines_use_case)],
+    active_only: bool = False
 ) -> list[AirlineResponseDTO]:
     """
     List all airlines or only active ones.
