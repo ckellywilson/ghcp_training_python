@@ -38,16 +38,22 @@ class CreateAirlineUseCase:
         Raises:
             ValueError: If airline with same code already exists
         """
-        # Check if airline with this code already exists
-        existing = self.repository.find_by_code(dto.code.upper())
+        # Check if airline with this IATA code already exists
+        existing = self.repository.find_by_iata_code(dto.iata_code.upper())
         if existing:
-            raise ValueError(f"Airline with code {dto.code.upper()} already exists")
+            raise ValueError(f"Airline with IATA code {dto.iata_code.upper()} already exists")
+        
+        # Check if airline with this ICAO code already exists
+        existing_icao = self.repository.find_by_icao_code(dto.icao_code.upper())
+        if existing_icao:
+            raise ValueError(f"Airline with ICAO code {dto.icao_code.upper()} already exists")
         
         # Create domain entity
         airline = Airline(
             id=str(uuid.uuid4()),
             name=dto.name,
-            code=dto.code,
+            iata_code=dto.iata_code,
+            icao_code=dto.icao_code,
             country=dto.country,
             active=dto.active,
             created_at=datetime.now(),
@@ -127,20 +133,22 @@ class UpdateAirlineUseCase:
         if not airline:
             return None
         
-        # Update fields if provided
-        if dto.name is not None:
-            airline.name = dto.name
-        if dto.country is not None:
-            airline.country = dto.country
-        if dto.active is not None:
-            airline.active = dto.active
-        
-        airline.updated_at = datetime.now()
+        # Create new instance with updated fields (immutable pattern)
+        updated_airline = Airline(
+            id=airline.id,
+            name=dto.name if dto.name is not None else airline.name,
+            iata_code=airline.iata_code,  # Codes cannot be updated
+            icao_code=airline.icao_code,
+            country=dto.country if dto.country is not None else airline.country,
+            active=dto.active if dto.active is not None else airline.active,
+            created_at=airline.created_at,
+            updated_at=datetime.now()
+        )
         
         # Persist changes
-        self.repository.save(airline)
+        self.repository.save(updated_airline)
         
-        return AirlineResponseDTO.model_validate(airline)
+        return AirlineResponseDTO.model_validate(updated_airline)
 
 
 class DeleteAirlineUseCase:

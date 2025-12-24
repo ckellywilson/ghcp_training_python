@@ -24,12 +24,24 @@ class AirlineRepository(Protocol):
         """
         ...
     
-    def find_by_code(self, code: str) -> Optional[Airline]:
+    def find_by_iata_code(self, iata_code: str) -> Optional[Airline]:
         """
         Find an airline by its IATA code.
         
         Args:
-            code: The IATA code (e.g., "AA")
+            iata_code: The IATA code (e.g., "AA")
+            
+        Returns:
+            The airline if found, None otherwise
+        """
+        ...
+    
+    def find_by_icao_code(self, icao_code: str) -> Optional[Airline]:
+        """
+        Find an airline by its ICAO code.
+        
+        Args:
+            icao_code: The ICAO code (e.g., "AAL")
             
         Returns:
             The airline if found, None otherwise

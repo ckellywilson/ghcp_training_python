@@ -8,7 +8,8 @@ from typing import Optional
 class AirlineCreateDTO(BaseModel):
     """DTO for creating a new airline."""
     name: str = Field(..., min_length=1, description="Airline name")
-    code: str = Field(..., min_length=2, max_length=2, description="IATA airline code")
+    iata_code: str = Field(..., min_length=2, max_length=2, description="IATA airline code")
+    icao_code: str = Field(..., min_length=3, max_length=4, description="ICAO airline code")
     country: str = Field(..., min_length=1, description="Country of origin")
     active: bool = Field(default=True, description="Whether the airline is active")
 
@@ -26,7 +27,8 @@ class AirlineResponseDTO(BaseModel):
     
     id: str
     name: str
-    code: str
+    iata_code: str
+    icao_code: str
     country: str
     active: bool
     created_at: Optional[datetime] = None

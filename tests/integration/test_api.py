@@ -35,7 +35,8 @@ def test_create_airline(client):
         "/api/v1/airlines/",
         json={
             "name": "American Airlines",
-            "code": "AA",
+            "iata_code": "AA",
+            "icao_code": "AAL",
             "country": "United States",
             "active": True
         }
@@ -44,7 +45,8 @@ def test_create_airline(client):
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == "American Airlines"
-    assert data["code"] == "AA"
+    assert data["iata_code"] == "AA"
+    assert data["icao_code"] == "AAL"
     assert data["id"] is not None
 
 
@@ -52,7 +54,8 @@ def test_create_duplicate_airline(client):
     """Test that creating duplicate airline code returns 400."""
     airline_data = {
         "name": "American Airlines",
-        "code": "AA",
+        "iata_code": "AA",
+        "icao_code": "AAL",
         "country": "United States"
     }
     
@@ -70,7 +73,7 @@ def test_get_airline(client):
     # Create airline
     create_response = client.post(
         "/api/v1/airlines/",
-        json={"name": "Delta", "code": "DL", "country": "United States"}
+        json={"name": "Delta", "iata_code": "DL", "icao_code": "DAL", "country": "United States"}
     )
     airline_id = create_response.json()["id"]
     
@@ -92,8 +95,8 @@ def test_get_nonexistent_airline(client):
 def test_list_airlines(client):
     """Test listing all airlines."""
     # Create multiple airlines
-    client.post("/api/v1/airlines/", json={"name": "AA", "code": "AA", "country": "US"})
-    client.post("/api/v1/airlines/", json={"name": "DL", "code": "DL", "country": "US"})
+    client.post("/api/v1/airlines/", json={"name": "AA", "iata_code": "AA", "icao_code": "AAL", "country": "US"})
+    client.post("/api/v1/airlines/", json={"name": "DL", "iata_code": "DL", "icao_code": "DAL", "country": "US"})
     
     # List all
     response = client.get("/api/v1/airlines/")
@@ -106,8 +109,8 @@ def test_list_airlines(client):
 def test_list_active_airlines_only(client):
     """Test listing only active airlines."""
     # Create active and inactive airlines
-    client.post("/api/v1/airlines/", json={"name": "Active", "code": "AC", "country": "US", "active": True})
-    client.post("/api/v1/airlines/", json={"name": "Inactive", "code": "IN", "country": "US", "active": False})
+    client.post("/api/v1/airlines/", json={"name": "Active", "iata_code": "AC", "icao_code": "ACTV", "country": "US", "active": True})
+    client.post("/api/v1/airlines/", json={"name": "Inactive", "iata_code": "IN", "icao_code": "INAC", "country": "US", "active": False})
     
     # List active only
     response = client.get("/api/v1/airlines/?active_only=true")
@@ -115,7 +118,7 @@ def test_list_active_airlines_only(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
-    assert data[0]["code"] == "AC"
+    assert data[0]["iata_code"] == "AC"
 
 
 def test_update_airline(client):
@@ -123,7 +126,7 @@ def test_update_airline(client):
     # Create airline
     create_response = client.post(
         "/api/v1/airlines/",
-        json={"name": "United", "code": "UA", "country": "United States"}
+        json={"name": "United", "iata_code": "UA", "icao_code": "UAL", "country": "United States"}
     )
     airline_id = create_response.json()["id"]
     
@@ -144,7 +147,7 @@ def test_delete_airline(client):
     # Create airline
     create_response = client.post(
         "/api/v1/airlines/",
-        json={"name": "Test", "code": "TS", "country": "Test Country"}
+        json={"name": "Test", "iata_code": "TS", "icao_code": "TEST", "country": "Test Country"}
     )
     airline_id = create_response.json()["id"]
     

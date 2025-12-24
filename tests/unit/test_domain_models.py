@@ -10,36 +10,41 @@ def test_airline_creation():
     airline = Airline(
         id="1",
         name="American Airlines",
-        code="AA",
+        iata_code="AA",
+        icao_code="AAL",
         country="United States"
     )
     
     assert airline.id == "1"
     assert airline.name == "American Airlines"
-    assert airline.code == "AA"
+    assert airline.iata_code == "AA"
+    assert airline.icao_code == "AAL"
     assert airline.country == "United States"
     assert airline.active is True
 
 
 def test_airline_code_uppercase():
-    """Test that airline code is converted to uppercase."""
+    """Test that airline codes are converted to uppercase."""
     airline = Airline(
         id="1",
         name="Delta",
-        code="dl",
+        iata_code="dl",
+        icao_code="dal",
         country="United States"
     )
     
-    assert airline.code == "DL"
+    assert airline.iata_code == "DL"
+    assert airline.icao_code == "DAL"
 
 
-def test_airline_invalid_code_length():
-    """Test that invalid code length raises ValueError."""
-    with pytest.raises(ValueError, match="must be exactly 2 characters"):
+def test_airline_invalid_iata_code_length():
+    """Test that invalid IATA code length raises ValueError."""
+    with pytest.raises(ValueError, match="IATA code must be exactly 2 characters"):
         Airline(
             id="1",
             name="Test Airline",
-            code="ABC",
+            iata_code="ABC",
+            icao_code="TEST",
             country="United States"
         )
 
@@ -50,7 +55,8 @@ def test_airline_empty_name():
         Airline(
             id="1",
             name="",
-            code="AA",
+            iata_code="AA",
+            icao_code="AAL",
             country="United States"
         )
 
@@ -60,14 +66,17 @@ def test_airline_deactivate():
     airline = Airline(
         id="1",
         name="Test Airline",
-        code="TA",
+        iata_code="TA",
+        icao_code="TEST",
         country="Test Country"
     )
     
     assert airline.active is True
-    airline.deactivate()
-    assert airline.active is False
-    assert airline.updated_at is not None
+    deactivated = airline.deactivate()
+    assert deactivated.active is False
+    assert deactivated.updated_at is not None
+    # Original instance remains unchanged (immutable)
+    assert airline.active is True
 
 
 def test_airline_activate():
@@ -75,12 +84,15 @@ def test_airline_activate():
     airline = Airline(
         id="1",
         name="Test Airline",
-        code="TA",
+        iata_code="TA",
+        icao_code="TEST",
         country="Test Country",
         active=False
     )
     
     assert airline.active is False
-    airline.activate()
-    assert airline.active is True
-    assert airline.updated_at is not None
+    activated = airline.activate()
+    assert activated.active is True
+    assert activated.updated_at is not None
+    # Original instance remains unchanged (immutable)
+    assert airline.active is False

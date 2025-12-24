@@ -92,6 +92,24 @@ class UserRepository(Protocol):
 
 ## Coding Standards
 
+### Immutability Principles
+- **Domain entities**: ALWAYS use frozen dataclasses (`@dataclass(frozen=True)`)
+  - Prevents accidental mutation and validation bypass
+  - Methods that modify state must return new instances
+  - Use `object.__setattr__()` in `__post_init__` if field transformation is needed
+  - Example:
+    ```python
+    @dataclass(frozen=True)
+    class Airline:
+        name: str
+        
+        def rename(self, new_name: str) -> 'Airline':
+            return Airline(name=new_name)  # Return new instance
+    ```
+- **DTOs**: Pydantic models are immutable by default (no additional configuration needed)
+- **Value objects**: Always immutable, use frozen dataclasses
+- Benefits: Thread-safety, predictable behavior, prevents invalid state mutations
+
 ### Type Hints
 - Use type hints for all function parameters and return values
 - Use Protocol for interface definitions
@@ -125,6 +143,7 @@ class UserRepository(Protocol):
 - Use in-memory implementations for testing use cases
 - Mock external dependencies in tests
 - Aim for high test coverage, especially in domain logic
+- **When testing immutable entities**: Assert that methods return new instances and original instances remain unchanged
 
 ## API Design
 

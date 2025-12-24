@@ -20,11 +20,19 @@ class InMemoryAirlineRepository:
         """Find airline by ID."""
         return self._airlines.get(airline_id)
     
-    def find_by_code(self, code: str) -> Optional[Airline]:
+    def find_by_iata_code(self, iata_code: str) -> Optional[Airline]:
         """Find airline by IATA code."""
-        code_upper = code.upper()
+        code_upper = iata_code.upper()
         for airline in self._airlines.values():
-            if airline.code == code_upper:
+            if airline.iata_code == code_upper:
+                return airline
+        return None
+    
+    def find_by_icao_code(self, icao_code: str) -> Optional[Airline]:
+        """Find airline by ICAO code."""
+        code_upper = icao_code.upper()
+        for airline in self._airlines.values():
+            if airline.icao_code == code_upper:
                 return airline
         return None
     

@@ -17,14 +17,16 @@ def test_create_airline_use_case(repository):
     use_case = CreateAirlineUseCase(repository)
     dto = AirlineCreateDTO(
         name="American Airlines",
-        code="AA",
+        iata_code="AA",
+        icao_code="AAL",
         country="United States"
     )
     
     result = use_case.execute(dto)
     
     assert result.name == "American Airlines"
-    assert result.code == "AA"
+    assert result.iata_code == "AA"
+    assert result.icao_code == "AAL"
     assert result.country == "United States"
     assert result.active is True
     assert result.id is not None
@@ -35,7 +37,8 @@ def test_create_duplicate_airline_code(repository):
     use_case = CreateAirlineUseCase(repository)
     dto = AirlineCreateDTO(
         name="American Airlines",
-        code="AA",
+        iata_code="AA",
+        icao_code="AAL",
         country="United States"
     )
     
@@ -55,7 +58,8 @@ def test_get_airline_use_case(repository):
     # Create airline
     dto = AirlineCreateDTO(
         name="Delta",
-        code="DL",
+        iata_code="DL",
+        icao_code="DAL",
         country="United States"
     )
     created = create_use_case.execute(dto)
@@ -82,8 +86,8 @@ def test_list_airlines_use_case(repository):
     list_use_case = ListAirlinesUseCase(repository)
     
     # Create multiple airlines
-    dto1 = AirlineCreateDTO(name="American Airlines", code="AA", country="United States")
-    dto2 = AirlineCreateDTO(name="Delta", code="DL", country="United States")
+    dto1 = AirlineCreateDTO(name="American Airlines", iata_code="AA", icao_code="AAL", country="United States")
+    dto2 = AirlineCreateDTO(name="Delta", iata_code="DL", icao_code="DAL", country="United States")
     
     create_use_case.execute(dto1)
     create_use_case.execute(dto2)
@@ -92,8 +96,8 @@ def test_list_airlines_use_case(repository):
     results = list_use_case.execute(active_only=False)
     
     assert len(results) == 2
-    assert any(r.code == "AA" for r in results)
-    assert any(r.code == "DL" for r in results)
+    assert any(r.iata_code == "AA" for r in results)
+    assert any(r.iata_code == "DL" for r in results)
 
 
 def test_list_active_airlines_only(repository):
@@ -102,8 +106,8 @@ def test_list_active_airlines_only(repository):
     list_use_case = ListAirlinesUseCase(repository)
     
     # Create active and inactive airlines
-    dto_active = AirlineCreateDTO(name="Active", code="AC", country="US", active=True)
-    dto_inactive = AirlineCreateDTO(name="Inactive", code="IN", country="US", active=False)
+    dto_active = AirlineCreateDTO(name="Active", iata_code="AC", icao_code="ACTV", country="US", active=True)
+    dto_inactive = AirlineCreateDTO(name="Inactive", iata_code="IN", icao_code="INAC", country="US", active=False)
     
     create_use_case.execute(dto_active)
     create_use_case.execute(dto_inactive)
@@ -112,4 +116,4 @@ def test_list_active_airlines_only(repository):
     results = list_use_case.execute(active_only=True)
     
     assert len(results) == 1
-    assert results[0].code == "AC"
+    assert results[0].iata_code == "AC"
