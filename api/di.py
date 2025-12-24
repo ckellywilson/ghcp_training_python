@@ -12,21 +12,15 @@ from application.use_cases import (
 )
 
 
-# Singleton repository instance
-_repository: AirlineRepository | None = None
-
-
+@lru_cache
 def get_airline_repository() -> AirlineRepository:
     """
-    Get airline repository instance.
+    Get airline repository instance (singleton via lru_cache).
     
     Uses in-memory implementation by default.
     In production, this would be configured to use a database implementation.
     """
-    global _repository
-    if _repository is None:
-        _repository = InMemoryAirlineRepository()
-    return _repository
+    return InMemoryAirlineRepository()
 
 
 def get_create_airline_use_case() -> CreateAirlineUseCase:
