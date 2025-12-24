@@ -1,6 +1,6 @@
 """Data Transfer Objects using Pydantic for validation."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional
 
@@ -22,6 +22,8 @@ class AirlineUpdateDTO(BaseModel):
 
 class AirlineResponseDTO(BaseModel):
     """DTO for airline responses."""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: str
     name: str
     code: str
@@ -29,7 +31,3 @@ class AirlineResponseDTO(BaseModel):
     active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    
-    class Config:
-        """Pydantic configuration."""
-        from_attributes = True
