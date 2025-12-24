@@ -3,7 +3,6 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import create_app
-from api.di import get_airline_repository
 from infrastructure.repositories.in_memory_airline_repository import InMemoryAirlineRepository
 
 
