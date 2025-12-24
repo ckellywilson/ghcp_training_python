@@ -1,7 +1,6 @@
 """Unit tests for domain models."""
 
 import pytest
-from datetime import datetime
 from domain.models import Airline
 
 
