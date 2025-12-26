@@ -67,7 +67,8 @@ curl -X POST "http://localhost:8000/api/v1/airlines/" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "American Airlines",
-    "code": "AA",
+    "iata_code": "AA",
+    "icao_code": "AAL",
     "country": "United States",
     "active": true
   }'
