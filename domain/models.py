@@ -1,7 +1,7 @@
 """Domain entities for the airline catalog."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 
@@ -51,7 +51,7 @@ class Airline:
             country=self.country,
             active=False,
             created_at=self.created_at,
-            updated_at=datetime.now()
+            updated_at=datetime.now(timezone.utc)
         )
     
     def activate(self) -> 'Airline':
@@ -64,5 +64,5 @@ class Airline:
             country=self.country,
             active=True,
             created_at=self.created_at,
-            updated_at=datetime.now()
+            updated_at=datetime.now(timezone.utc)
         )
