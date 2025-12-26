@@ -23,18 +23,23 @@ class Airline:
     
     def __post_init__(self):
         """Validate airline data upon initialization."""
-        if not self.iata_code or len(self.iata_code) != 2:
+        # Normalize codes to uppercase for validation and storage
+        iata_upper = self.iata_code.upper() if self.iata_code else ""
+        icao_upper = self.icao_code.upper() if self.icao_code else ""
+        
+        # Validate normalized codes
+        if not iata_upper or len(iata_upper) != 2:
             raise ValueError("IATA code must be exactly 2 characters")
-        if not self.icao_code or len(self.icao_code) < 3 or len(self.icao_code) > 4:
+        if not icao_upper or len(icao_upper) < 3 or len(icao_upper) > 4:
             raise ValueError("ICAO code must be 3 or 4 characters")
         if not self.name or not self.name.strip():
             raise ValueError("Airline name cannot be empty")
         if not self.country or not self.country.strip():
             raise ValueError("Country cannot be empty")
         
-        # Ensure codes are uppercase (using object.__setattr__ since dataclass is frozen)
-        object.__setattr__(self, 'iata_code', self.iata_code.upper())
-        object.__setattr__(self, 'icao_code', self.icao_code.upper())
+        # Store normalized uppercase codes (using object.__setattr__ since dataclass is frozen)
+        object.__setattr__(self, 'iata_code', iata_upper)
+        object.__setattr__(self, 'icao_code', icao_upper)
     
     def deactivate(self) -> 'Airline':
         """Return a new deactivated airline instance."""
