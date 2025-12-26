@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from main import create_app
 from api.di import (
     get_airline_repository,
+    get_id_generator,
     get_create_airline_use_case,
     get_get_airline_use_case,
     get_list_airlines_use_case,
@@ -19,6 +20,7 @@ from application.use_cases import (
     DeleteAirlineUseCase
 )
 from infrastructure.repositories.in_memory_airline_repository import InMemoryAirlineRepository
+from tests.fixtures.id_generator import DeterministicIdGenerator
 
 
 @pytest.fixture
@@ -26,14 +28,16 @@ def client():
     """Create a test client with a fresh repository."""
     app = create_app()
     
-    # Create fresh repository instance for each test
+    # Create fresh repository and ID generator for each test
     test_repository = InMemoryAirlineRepository()
+    test_id_generator = DeterministicIdGenerator()
     
-    # Override repository
+    # Override dependencies
     app.dependency_overrides[get_airline_repository] = lambda: test_repository
+    app.dependency_overrides[get_id_generator] = lambda: test_id_generator
     
-    # Override all use cases to use the test repository
-    app.dependency_overrides[get_create_airline_use_case] = lambda: CreateAirlineUseCase(test_repository)
+    # Override all use cases to use the test repository and ID generator
+    app.dependency_overrides[get_create_airline_use_case] = lambda: CreateAirlineUseCase(test_repository, test_id_generator)
     app.dependency_overrides[get_get_airline_use_case] = lambda: GetAirlineUseCase(test_repository)
     app.dependency_overrides[get_list_airlines_use_case] = lambda: ListAirlinesUseCase(test_repository)
     app.dependency_overrides[get_update_airline_use_case] = lambda: UpdateAirlineUseCase(test_repository)

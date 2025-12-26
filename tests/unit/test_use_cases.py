@@ -4,6 +4,7 @@ import pytest
 from application.use_cases import CreateAirlineUseCase, GetAirlineUseCase, ListAirlinesUseCase
 from application.dtos import AirlineCreateDTO
 from infrastructure.repositories.in_memory_airline_repository import InMemoryAirlineRepository
+from tests.fixtures.id_generator import DeterministicIdGenerator
 
 
 @pytest.fixture
@@ -12,9 +13,15 @@ def repository():
     return InMemoryAirlineRepository()
 
 
-def test_create_airline_use_case(repository):
+@pytest.fixture
+def id_generator():
+    """Provide a deterministic ID generator for each test."""
+    return DeterministicIdGenerator()
+
+
+def test_create_airline_use_case(repository, id_generator):
     """Test creating an airline through the use case."""
-    use_case = CreateAirlineUseCase(repository)
+    use_case = CreateAirlineUseCase(repository, id_generator)
     dto = AirlineCreateDTO(
         name="American Airlines",
         iata_code="AA",
@@ -29,12 +36,12 @@ def test_create_airline_use_case(repository):
     assert result.icao_code == "AAL"
     assert result.country == "United States"
     assert result.active is True
-    assert result.id is not None
+    assert result.id == "test-id-1"  # Deterministic ID
 
 
-def test_create_duplicate_airline_code(repository):
+def test_create_duplicate_airline_code(repository, id_generator):
     """Test that creating an airline with duplicate code raises ValueError."""
-    use_case = CreateAirlineUseCase(repository)
+    use_case = CreateAirlineUseCase(repository, id_generator)
     dto = AirlineCreateDTO(
         name="American Airlines",
         iata_code="AA",
@@ -50,9 +57,9 @@ def test_create_duplicate_airline_code(repository):
         use_case.execute(dto)
 
 
-def test_get_airline_use_case(repository):
+def test_get_airline_use_case(repository, id_generator):
     """Test getting an airline by ID."""
-    create_use_case = CreateAirlineUseCase(repository)
+    create_use_case = CreateAirlineUseCase(repository, id_generator)
     get_use_case = GetAirlineUseCase(repository)
     
     # Create airline
@@ -68,7 +75,7 @@ def test_get_airline_use_case(repository):
     result = get_use_case.execute(created.id)
     
     assert result is not None
-    assert result.id == created.id
+    assert result.id == "test-id-1"  # Deterministic ID
     assert result.name == "Delta"
 
 
@@ -80,9 +87,9 @@ def test_get_nonexistent_airline(repository):
     assert result is None
 
 
-def test_list_airlines_use_case(repository):
+def test_list_airlines_use_case(repository, id_generator):
     """Test listing all airlines."""
-    create_use_case = CreateAirlineUseCase(repository)
+    create_use_case = CreateAirlineUseCase(repository, id_generator)
     list_use_case = ListAirlinesUseCase(repository)
     
     # Create multiple airlines
@@ -100,9 +107,9 @@ def test_list_airlines_use_case(repository):
     assert any(r.iata_code == "DL" for r in results)
 
 
-def test_list_active_airlines_only(repository):
+def test_list_active_airlines_only(repository, id_generator):
     """Test listing only active airlines."""
-    create_use_case = CreateAirlineUseCase(repository)
+    create_use_case = CreateAirlineUseCase(repository, id_generator)
     list_use_case = ListAirlinesUseCase(repository)
     
     # Create active and inactive airlines

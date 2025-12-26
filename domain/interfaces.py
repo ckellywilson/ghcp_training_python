@@ -4,6 +4,24 @@ from typing import Protocol, Optional
 from domain.models import Airline
 
 
+class IdGenerator(Protocol):
+    """
+    Interface for generating unique identifiers.
+    
+    Abstracts ID generation to improve testability and allow different
+    ID generation strategies.
+    """
+    
+    def generate(self) -> str:
+        """
+        Generate a unique identifier.
+        
+        Returns:
+            A unique identifier string
+        """
+        ...
+
+
 class AirlineRepository(Protocol):
     """
     Repository interface for Airline persistence.

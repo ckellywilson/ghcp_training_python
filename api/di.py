@@ -1,8 +1,9 @@
 """Dependency injection configuration for FastAPI."""
 
 from functools import lru_cache
-from domain.interfaces import AirlineRepository
+from domain.interfaces import AirlineRepository, IdGenerator
 from infrastructure.repositories.in_memory_airline_repository import InMemoryAirlineRepository
+from infrastructure.id_generator import UuidGenerator
 from application.use_cases import (
     CreateAirlineUseCase,
     GetAirlineUseCase,
@@ -23,9 +24,19 @@ def get_airline_repository() -> AirlineRepository:
     return InMemoryAirlineRepository()
 
 
+@lru_cache
+def get_id_generator() -> IdGenerator:
+    """
+    Get ID generator instance (singleton via lru_cache).
+    
+    Uses UUID v4 implementation by default.
+    """
+    return UuidGenerator()
+
+
 def get_create_airline_use_case() -> CreateAirlineUseCase:
     """Dependency injection for CreateAirlineUseCase."""
-    return CreateAirlineUseCase(get_airline_repository())
+    return CreateAirlineUseCase(get_airline_repository(), get_id_generator())
 
 
 def get_get_airline_use_case() -> GetAirlineUseCase:

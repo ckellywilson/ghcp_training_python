@@ -2,10 +2,9 @@
 
 from datetime import datetime
 from typing import Optional
-import uuid
 
 from domain.models import Airline
-from domain.interfaces import AirlineRepository
+from domain.interfaces import AirlineRepository, IdGenerator
 from application.dtos import AirlineCreateDTO, AirlineUpdateDTO, AirlineResponseDTO
 
 
@@ -16,14 +15,16 @@ class CreateAirlineUseCase:
     Depends only on the domain interface, not concrete implementations.
     """
     
-    def __init__(self, repository: AirlineRepository):
+    def __init__(self, repository: AirlineRepository, id_generator: IdGenerator):
         """
-        Initialize with airline repository.
+        Initialize with airline repository and ID generator.
         
         Args:
             repository: Repository implementation following AirlineRepository protocol
+            id_generator: ID generator implementation following IdGenerator protocol
         """
         self.repository = repository
+        self.id_generator = id_generator
     
     def execute(self, dto: AirlineCreateDTO) -> AirlineResponseDTO:
         """
@@ -50,7 +51,7 @@ class CreateAirlineUseCase:
         
         # Create domain entity
         airline = Airline(
-            id=str(uuid.uuid4()),
+            id=self.id_generator.generate(),
             name=dto.name,
             iata_code=dto.iata_code,
             icao_code=dto.icao_code,
