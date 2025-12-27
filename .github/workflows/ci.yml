@@ -1,0 +1,88 @@
+name: CI - Continuous Integration
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      airline-service: ${{ steps.filter.outputs.airline-service }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            airline-service:
+              - 'services/airline-service/**'
+              - 'shared/**'
+            shared:
+              - 'shared/**'
+
+  lint-and-test-airline:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.airline-service == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/airline-service
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: services/airline-service/requirements.txt
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov ruff mypy
+      
+      - name: Lint with ruff
+        run: |
+          ruff check .
+      
+      - name: Type check with mypy
+        run: |
+          mypy . --ignore-missing-imports
+      
+      - name: Run tests
+        run: |
+          pytest tests/ -v --cov=. --cov-report=xml --cov-report=term
+      
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./services/airline-service/coverage.xml
+          flags: airline-service
+          name: airline-service-coverage
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
