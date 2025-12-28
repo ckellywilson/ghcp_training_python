@@ -1,6 +1,6 @@
 """Messaging interfaces for inter-service communication."""
 
-from typing import Any, Callable, Protocol
+from typing import Any, Awaitable, Callable, Protocol
 
 
 class MessagePublisher(Protocol):
@@ -23,7 +23,7 @@ class MessageConsumer(Protocol):
     async def subscribe(
         self,
         topic: str,
-        handler: Callable[[dict[str, Any]], None]
+        handler: Callable[[dict[str, Any]], Awaitable[None]]
     ) -> None:
         """
         Subscribe to a topic and register a message handler.
