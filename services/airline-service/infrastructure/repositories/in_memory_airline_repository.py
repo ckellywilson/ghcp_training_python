@@ -3,7 +3,6 @@
 from threading import Lock
 from typing import Optional
 from domain.models import Airline
-from domain.interfaces import AirlineRepository
 
 
 class InMemoryAirlineRepository:
