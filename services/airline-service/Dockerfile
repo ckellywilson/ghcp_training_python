@@ -16,6 +16,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Create non-privileged user and change ownership
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+# Switch to non-privileged user
+USER appuser
+
 # Expose port
 EXPOSE 8000
 
