@@ -1,11 +1,14 @@
 """Common middleware for FastAPI microservices."""
 
+import logging
 import time
 import uuid
 from typing import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+
+logger = logging.getLogger(__name__)
 
 
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
@@ -41,7 +44,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         
         # Log request details
         correlation_id = getattr(request.state, "correlation_id", "N/A")
-        print(
+        logger.info(
             f"Request: {request.method} {request.url.path} | "
             f"Status: {response.status_code} | "
             f"Duration: {duration:.3f}s | "
