@@ -29,8 +29,18 @@ fi
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current)
 
-if [ "$CURRENT_BRANCH" = "main" ]; then
-    echo -e "${RED}Error: Cannot create PR from main branch${NC}"
+# Determine default branch (try main, fall back to master)
+if git rev-parse --verify origin/main &> /dev/null; then
+    DEFAULT_BRANCH="main"
+elif git rev-parse --verify origin/master &> /dev/null; then
+    DEFAULT_BRANCH="master"
+else
+    echo -e "${RED}Error: Cannot determine default branch${NC}"
+    exit 1
+fi
+
+if [ "$CURRENT_BRANCH" = "$DEFAULT_BRANCH" ]; then
+    echo -e "${RED}Error: Cannot create PR from $DEFAULT_BRANCH branch${NC}"
     exit 1
 fi
 
@@ -48,7 +58,7 @@ if gh pr view "$CURRENT_BRANCH" &> /dev/null; then
 fi
 
 # Extract commit types from branch commits
-COMMIT_TYPES=$(git log --oneline origin/main..HEAD | grep -oE '^[a-f0-9]+ (feat|fix|docs|style|refactor|test|chore)' | cut -d' ' -f2 | sort -u | tr '\n' ', ' | sed 's/,$//')
+COMMIT_TYPES=$(git log --oneline origin/$DEFAULT_BRANCH..HEAD 2>/dev/null | grep -oE '^[a-f0-9]+ (feat|fix|docs|style|refactor|test|chore)' | cut -d' ' -f2 | sort -u | tr '\n' ', ' | sed 's/,$//' || echo "")
 
 # Generate PR title from branch name
 # Convert feature/my-feature-name to "My Feature Name"
@@ -60,13 +70,13 @@ if [ -n "$COMMIT_TYPES" ]; then
 fi
 
 echo -e "${GREEN}Creating PR:${NC}"
-echo -e "  Branch: ${YELLOW}$CURRENT_BRANCH${NC} -> ${YELLOW}main${NC}"
+echo -e "  Branch: ${YELLOW}$CURRENT_BRANCH${NC} -> ${YELLOW}$DEFAULT_BRANCH${NC}"
 echo -e "  Title: ${YELLOW}$PR_TITLE${NC}"
 echo ""
 
 # Create PR with template
 gh pr create \
-    --base main \
+    --base "$DEFAULT_BRANCH" \
     --head "$CURRENT_BRANCH" \
     --title "$PR_TITLE" \
     --fill \
