@@ -43,7 +43,7 @@ All resources use AVM modules from the Bicep Public Registry:
 - **Resource Group**: Container for all environment resources
 - **Log Analytics Workspace**: Centralized logging (30-day retention)
 - **Application Insights**: Application monitoring and telemetry
-- **Container Registry**: Docker image storage with admin user enabled
+- **Container Registry**: Docker image storage with admin user disabled (access via Azure AD/RBAC)
 - **Container Apps Environment**: Hosting environment for microservices
 - **Container Apps**: Individual microservice instances (currently: airline-service)
 - **Key Vault**: Secrets management with RBAC authorization
