@@ -521,13 +521,43 @@ This is a training repository. When adding features:
 
 ### Pull Request Process
 
-9. **Create PR with context**:
-   - Use the PR template (auto-populated)
-   - Check all applicable checkboxes
-   - Link related issues
-   - Provide clear description and reasoning
+9. **Create Pull Request**:
+   
+   **Option A: Using the helper script (Recommended)**:
+   ```bash
+   # Automatically creates PR with proper formatting
+   ./scripts/create-pr.sh
+   ```
+   
+   The script will:
+   - ✅ Push your branch if not already pushed
+   - ✅ Extract commit types from your commits
+   - ✅ Generate a descriptive PR title
+   - ✅ Use the PR template automatically
+   - ✅ Open the PR in your browser
+   
+   **Option B: Using GitHub CLI directly**:
+   ```bash
+   # Push your branch
+   git push -u origin your-branch-name
+   
+   # Create PR with template
+   gh pr create --base main --fill --web
+   ```
+   
+   **Option C: Via GitHub Web UI**:
+   - Push your branch: `git push -u origin your-branch-name`
+   - Visit the URL shown in the push output
+   - Or go to the repository and click "Compare & pull request"
 
-10. **Code review checklist**:
+10. **Complete the PR template**:
+    - Use the PR template (auto-populated)
+    - Check all applicable checkboxes
+    - Link related issues (e.g., "Closes #123")
+    - Provide clear description and reasoning
+    - Add screenshots/demos if applicable
+
+11. **Code review checklist**:
     - [ ] Follows Clean Architecture principles
     - [ ] All tests pass
     - [ ] Code coverage maintained

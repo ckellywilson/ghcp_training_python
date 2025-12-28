@@ -81,6 +81,78 @@ git commit
 git commit -m "feat(airline-service): add booking validation"
 ```
 
+## Creating Pull Requests
+
+### Using the Helper Script (Recommended)
+
+The repository includes a script for easy PR creation:
+
+```bash
+# From any branch (except main)
+./scripts/create-pr.sh
+```
+
+**What it does:**
+- Checks if GitHub CLI (`gh`) is installed and authenticated
+- Pushes your branch if not already pushed
+- Extracts commit types from your commits (feat, fix, etc.)
+- Generates a descriptive PR title from branch name and commit types
+- Uses the PR template automatically
+- Opens the PR in your browser for final review
+
+**Example output:**
+```
+Creating Pull Request...
+
+✓ Authenticated with GitHub
+✓ Pushing branch feature/booking-service...
+
+Creating PR:
+  Branch: feature/booking-service -> main
+  Title: [feat, test] Feature Booking Service
+
+✓ Pull request created successfully!
+Opening in browser...
+```
+
+### Using GitHub CLI Directly
+
+```bash
+# Push your branch
+git push -u origin your-branch-name
+
+# Create PR interactively
+gh pr create --base main --fill --web
+
+# Or with explicit title and body
+gh pr create \
+  --base main \
+  --title "feat(booking): add booking service" \
+  --body "Adds new booking microservice following Clean Architecture" \
+  --web
+```
+
+### GitHub CLI Prerequisites
+
+Install GitHub CLI if not already available:
+
+```bash
+# macOS
+brew install gh
+
+# Linux (Debian/Ubuntu)
+sudo apt install gh
+
+# Windows
+winget install --id GitHub.cli
+```
+
+Authenticate:
+
+```bash
+gh auth login
+```
+
 ## Examples
 
 ### Good Commit Messages
