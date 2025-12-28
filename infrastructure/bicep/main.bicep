@@ -65,7 +65,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.7.0' =
     name: 'cr${environmentName}${uniqueSuffix}'
     location: location
     acrSku: 'Basic'
-    adminUserEnabled: true
+    adminUserEnabled: false // Disabled for security - use managed identity instead
     publicNetworkAccess: 'Enabled'
     tags: tags
   }
@@ -152,6 +152,9 @@ module airlineService 'br/public:avm/res/app/container-app:0.11.0' = {
     location: location
     environmentResourceId: containerAppsEnvironment.outputs.resourceId
     tags: tags
+    managedIdentities: {
+      systemAssigned: true
+    }
     containers: [
       {
         name: 'airline-service'
@@ -181,18 +184,20 @@ module airlineService 'br/public:avm/res/app/container-app:0.11.0' = {
     registries: [
       {
         server: containerRegistry.outputs.loginServer
-        username: containerRegistry.outputs.name
-        passwordSecretRef: 'registry-password'
+        identity: 'system'
       }
     ]
-    secrets: {
-      secureList: [
-        {
-          name: 'registry-password'
-          value: containerRegistry.listCredentials().passwords[0].value
-        }
-      ]
-    }
+  }
+}
+
+// Grant the Container App's managed identity permission to pull from ACR
+module acrRoleAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
+  name: 'acr-role-assignment'
+  scope: rg
+  params: {
+    principalId: airlineService.outputs.systemAssignedMIPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d') // AcrPull role
+    resourceId: containerRegistry.outputs.resourceId
   }
 }
 
