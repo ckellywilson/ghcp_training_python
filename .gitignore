@@ -71,3 +71,14 @@ venv.bak/
 # Database
 *.db
 *.sqlite3
+
+# Azure
+.azure/
+azure.yaml.bak
+
+# Docker
+docker-compose.override.local.yml
+
+# Local data
+data/
+*.local.*

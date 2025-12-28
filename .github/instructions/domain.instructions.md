@@ -4,25 +4,24 @@ Files in the `domain/` directory contain pure business logic with no external de
 
 ## Core Principles
 
-- **Zero Framework Dependencies**: No imports from FastAPI, Pydantic, or any infrastructure libraries
-- **Protocol-Based Interfaces**: All abstractions use `Protocol` from `typing`, never ABC
-- **Pure Python**: Only standard library types and domain-specific classes
+- **Zero Framework Dependencies**: No imports from web frameworks, validation libraries, or any infrastructure libraries
+- **Interface-Based Abstractions**: All abstractions use language-appropriate interface mechanisms
+- **Pure Business Logic**: Only standard library types and domain-specific classes
 
 ## Interface Definitions
 
-Use Protocol for all repository and service interfaces:
+Define interfaces for all repository and service abstractions that the domain needs.
 
-```python
-from typing import Protocol
-
-class OrderRepository(Protocol):
-    def find_by_id(self, order_id: str) -> Order | None: ...
-    def save(self, order: Order) -> None: ...
+Example concept:
+```
+interface OrderRepository:
+    find_by_id(order_id: string) -> Order | null
+    save(order: Order) -> void
 ```
 
 ## Domain Models
 
-- Use dataclasses or plain classes for entities
+- Use immutable data structures for entities and value objects
 - Implement business logic as methods on entities
 - Keep validation logic within domain models
 - Use value objects for complex types
@@ -31,16 +30,15 @@ class OrderRepository(Protocol):
 
 Define domain-specific exceptions in this layer:
 
-```python
-class OrderNotFoundError(Exception):
+```
+class OrderNotFoundError extends Exception:
     """Raised when an order cannot be found."""
-    pass
 ```
 
 ## What NOT to Include
 
-- ❌ FastAPI dependencies
-- ❌ Pydantic models (use in application layer instead)
+- ❌ Web framework dependencies
+- ❌ Framework-specific validation models (use in application layer instead)
 - ❌ Database models or ORM classes
 - ❌ HTTP-specific code
 - ❌ Concrete infrastructure implementations
